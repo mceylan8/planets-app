@@ -24,27 +24,27 @@ const planets = [
   {
     name: 'Mars',
     description: 'The Red Planet, known for its iron oxide-rich surface.',
-    image: require('@/assets/images/mars.png'),
+    image: require('@/assets/images/venus.png'),
   },
   {
     name: 'Jupiter',
     description: 'The largest planet in the solar system.',
-    image: require('@/assets/images/jupiter.png'),
+    image: require('@/assets/images/earth.png'),
   },
   {
     name: 'Saturn',
     description: 'Famous for its stunning ring system.',
-    image: require('@/assets/images/saturn.png'),
+    image: require('@/assets/images/mercury.png'),
   },
   {
     name: 'Uranus',
     description: 'An ice giant with a unique sideways rotation.',
-    image: require('@/assets/images/uranus.png'),
+    image: require('@/assets/images/earth.png'),
   },
   {
     name: 'Neptune',
     description: 'The farthest planet from the Sun, deep blue in color.',
-    image: require('@/assets/images/neptune.png'),
+    image: require('@/assets/images/venus.png'),
   },
 ];
 
@@ -62,7 +62,7 @@ export default function HomeScreen() {
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
       headerImage={
         <Image
-          source={require('@/assets/images/solar-system.png')}
+          source={require('@/assets/images/solar-system.jpg')}
           style={styles.headerImage}
         />
       }>
