@@ -1,54 +1,114 @@
-<<<<<<< HEAD
-# planets-app
-=======
-# Welcome to your Expo app 👋
+# 🌌 Planets App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Welcome to the **Planets App** – a beautifully designed Expo app that showcases the planets of our solar system!  
+Explore fascinating details about Mercury, Venus, Earth, and beyond, all wrapped in a sleek and interactive design.
 
-## Get started
+---
 
-1. Install dependencies
+## 🎥 Demo
 
-   ```bash
-   npm install
-   ```
+![App Demo](https://via.placeholder.com/800x400?text=Insert+GIF+here)  
+---
 
-2. Start the app
+## 🚀 Features
 
-   ```bash
-    npx expo start
-   ```
+- 🌍 **Interactive List**: Explore all the planets with images, names, and descriptions.
+- 🌌 **Sleek Design**: A clean, intuitive UI built with `ParallaxScrollView` and themed components.
+- 📱 **Cross-Platform**: Runs on Android, iOS, and Web using Expo.
+- 🔄 **Fast Refresh**: Instant updates as you code.
 
-In the output, you'll find options to open the app in a
+---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 🛠️ Getting Started
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### 1. Clone the repository
 
-## Get a fresh project
+```bash
+git clone https://github.com/mceylan8/planets-app.git
+cd planets-app
+```
 
-When you're ready, run:
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Start the development server
+
+```bash
+npx expo start
+```
+
+You'll see a QR code in the terminal. Open it with the [Expo Go](https://expo.dev/client) app on your smartphone or launch the app in a simulator/emulator.
+
+---
+
+## 📸 Screenshots
+
+| Home Screen | Planet List | Planet Detail |
+|-------------|-------------|---------------|
+| ![Home](https://via.placeholder.com/200x400?text=Home+Screen) | ![List](https://via.placeholder.com/200x400?text=Planet+List) | ![Detail](https://via.placeholder.com/200x400?text=Planet+Detail) |
+
+---
+
+## 🌟 How to Use
+
+1. Open the app using one of the following methods:
+   - **Expo Go**: Scan the QR code in the terminal.
+   - **iOS Simulator**: Press `i` in the terminal.
+   - **Android Emulator**: Press `a` in the terminal.
+
+2. Swipe through the list to explore the planets.
+
+3. Tap on a planet to learn more about it.
+
+---
+
+## 🧑‍💻 Development
+
+This app uses Expo's **file-based routing** for clean navigation. Modify the files in the `app` directory to customize the app.
+
+### Reset to a fresh project
+
+Run the following command to clear the project and start fresh:
 
 ```bash
 npm run reset-project
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## 📚 Learn More
 
-To learn more about developing your project with Expo, look at the following resources:
+To learn more about Expo and how to build universal apps, check out these resources:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- [Expo Documentation](https://docs.expo.dev/)
+- [Expo Router Guide](https://docs.expo.dev/router/introduction/)
+- [React Native Docs](https://reactnative.dev/)
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
+## 💌 Contributing
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
->>>>>>> Initial commit
+Feel free to fork this repository, submit a pull request, or open an issue for bugs and features. Contributions are always welcome! 🙌
+
+---
+
+## 👩‍🚀 Author
+
+Created with ❤️ by [mceylan8](https://github.com/mceylan8).
+
+---
+
+## 🔗 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## 🚀 Future Enhancements
+
+- Add animations to transitions between screens.
+- Include real-time data about planets (e.g., distance from the Sun).
+- Implement user interactions like favorites or notes.
