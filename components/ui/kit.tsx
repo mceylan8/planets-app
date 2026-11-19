@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: space.xs,
   },
-  buttonLabel: { fontSize: 15, fontWeight: '600' },
+  buttonLabel: type.button as any,
   disabled: { opacity: 0.4 },
   iconButton: {
     width: hitTarget,

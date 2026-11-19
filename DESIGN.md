@@ -1,13 +1,13 @@
 # Design-System: Planets
 
-Die App ist ein Fenster in den Weltraum. Die 3D-Szene führt, die Oberfläche tritt zurück: dunkle, ruhige Flächen, ein einziger warmer Akzent (Sonnenlicht) und Messwerte in einer Datenschrift.
+Die App ist ein Fenster in den Weltraum. Die 3D-Szene führt, die Oberfläche tritt zurück: dunkle, ruhige Flächen, ein einziger Akzent in Weiß und kräftige Überschriften in Unbounded.
 
 Alle Werte liegen in [`constants/theme.ts`](constants/theme.ts). In Komponenten stehen keine festen Farben, Größen oder Schriften.
 
 ## Grundsätze
 
 1. **Die Szene führt.** UI über der 3D-Ansicht schwebt am Rand und lässt die Mitte frei. Wenn ein Planet gewählt ist, wird der Bildausschnitt so verschoben, dass er zwischen Titelzeile und Infokarte steht.
-2. **Ein Akzent, eine Bedeutung.** Gelb (`accent`) heißt „ausgewählt“ oder „Hauptaktion“, sonst nichts: gewählter Planeten-Chip, aktive Bahn, Primary-Button, aktiver Tab.
+2. **Ein Akzent, eine Bedeutung.** Weiß (`accent`) heißt „ausgewählt“ oder „Hauptaktion“, sonst nichts: gewählter Planeten-Chip, aktive Bahn, Primary-Button, aktiver Tab.
 3. **Immer dunkel.** Man schaut in den Weltraum. Helle Flächen neben einer schwarzen Szene würden blenden, deshalb gibt es kein Light-Theme (`userInterfaceStyle: dark`).
 4. **Ehrliche Daten.** Fakten stammen von der NASA. Wo die Darstellung nicht maßstabsgetreu ist (Größen, Abstände), steht das in der App.
 
@@ -17,22 +17,22 @@ Alle Werte liegen in [`constants/theme.ts`](constants/theme.ts). In Komponenten 
 
 | Token | Wert | Verwendung |
 | --- | --- | --- |
-| `space` | `#05060A` | Hintergrund der Szene und Seiten |
-| `surface` | `#10121A` | Karten, Sheets, Tab-Leiste, Chips |
-| `surfaceRaised` | `#1A1D27` | Hover/gedrückt auf Flächen, Secondary-Button |
+| `space` | `#0B1026` | Hintergrund der Szene und Seiten |
+| `surface` | `#141B3A` | Karten, Sheets, Tab-Leiste, Chips |
+| `surfaceRaised` | `#1D2550` | Hover/gedrückt auf Flächen, Secondary-Button |
 | `border` | `rgba(255,255,255,.08)` | Haarlinien |
 | `hoverFill` / `selectedFill` | weiß 6 % / 16 % | Hover und gewähltes Segment in neutralen Controls |
-| `text` | `#F3F1EA` | Haupttext |
-| `textMuted` | `#A9ADB8` | Sekundärtext (7,4:1 auf `surface`) |
-| `textSubtle` | `#858A97` | Labels, Quellen (5,2:1 auf `surface`) |
-| `accent` / `accentPressed` | `#F5B544` / `#E3A232` | Auswahl, Primary |
-| `onAccent` | `#1C1406` | Text auf Akzent (11:1) |
+| `text` | `#EEF0FA` | Haupttext |
+| `textMuted` | `#A3ACD0` | Sekundärtext (6,6:1 auf `surface`) |
+| `textSubtle` | `#8A93BC` | Labels, Quellen (4,9:1 auf `surface`) |
+| `accent` / `accentPressed` | `#FFFFFF` / `#D9DDEE` | Auswahl, Primary |
+| `onAccent` | `#0B1026` | Text auf Akzent (17:1) |
 
 Planetenfarben sind Daten und liegen in [`constants/planets.ts`](constants/planets.ts), nicht im Theme.
 
 ### Typografie
 
-System-Schrift für Text, `SpaceMono` nur für Messwerte (Durchmesser, Abstand, Temperatur). Tabellenziffern für alle Zahlen.
+Unbounded für Überschriften und Messwerte, Inter für Text, Caveat (Handschrift) nur im Schaukasten. Eigene Schriften brauchen je Gewicht eine eigene Familie, deshalb kein `fontWeight`. Tabellenziffern für alle Zahlen.
 
 | Token | Größe / Zeile | Gewicht | Wofür |
 | --- | --- | --- | --- |
@@ -42,7 +42,9 @@ System-Schrift für Text, `SpaceMono` nur für Messwerte (Durchmesser, Abstand, 
 | `body` | 16 / 24 | 400 | Fließtext, max. 640 px breit |
 | `bodySmall` | 14 / 20 | 400 | Beschreibung in Zeilen |
 | `label` | 13 / 18 | 500 | Fakten-Labels, Chips, Segmente |
-| `data` / `dataSmall` | 17 / 13 | Mono | Messwerte in Kacheln / Infokarte |
+| `data` / `dataSmall` | 18 / 13 | Unbounded 500 | Messwerte in Kacheln / Infokarte |
+| `button` | 15 / 20 | Inter 600 | Buttons |
+| `hand` | 15 / 17 | Caveat 700 | Namensschilder im Schaukasten |
 
 ### Abstände
 

@@ -1,5 +1,7 @@
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Caveat_700Bold } from '@expo-google-fonts/caveat';
+import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
+import { Unbounded_500Medium, Unbounded_700Bold } from '@expo-google-fonts/unbounded';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -27,8 +29,12 @@ const theme = {
 
 export default function RootLayout() {
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     Caveat_700Bold,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Unbounded_500Medium,
+    Unbounded_700Bold,
   });
 
   useEffect(() => {

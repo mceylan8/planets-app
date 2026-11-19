@@ -8,31 +8,31 @@ import { Easing } from 'react-native-reanimated';
 
 export const color = {
   /** Tiefster Grund: Weltraum hinter der 3D-Szene und Seitenhintergrund */
-  space: '#05060A',
+  space: '#0B1026',
   /** Fläche für Karten, Sheets, Tab-Leiste */
-  surface: '#10121A',
+  surface: '#141B3A',
   /** Erhöhte Fläche: gedrückte Zeilen, Kacheln auf Karten, Segment-Hintergrund */
-  surfaceRaised: '#1A1D27',
+  surfaceRaised: '#1D2550',
   /** Haarlinien und Trenner */
-  border: 'rgba(255, 255, 255, 0.08)',
+  border: 'rgba(238, 240, 250, 0.09)',
   /** Hover auf Flächen */
   hoverFill: 'rgba(255, 255, 255, 0.06)',
   /** Gewähltes Segment in neutralen Steuerelementen */
   selectedFill: 'rgba(255, 255, 255, 0.16)',
 
-  text: '#F3F1EA',
-  /** Sekundärtext, 8.6:1 auf space, 7.4:1 auf surface */
-  textMuted: '#A9ADB8',
-  /** Tertiärtext (Labels), 5.2:1 auf surface */
-  textSubtle: '#858A97',
+  text: '#EEF0FA',
+  /** Sekundärtext, 7.6:1 auf space, 6.6:1 auf surface */
+  textMuted: '#A3ACD0',
+  /** Tertiärtext (Labels), 4.9:1 auf surface */
+  textSubtle: '#8A93BC',
 
-  /** Akzent: Sonnenlicht. Für Auswahl, Primary-Button, aktive Bahn */
-  accent: '#F5B544',
-  accentPressed: '#E3A232',
-  /** Text auf Akzentfläche, 11:1 */
-  onAccent: '#1C1406',
+  /** Akzent: Weiß. Für Auswahl, Primary-Button, aktive Bahn */
+  accent: '#FFFFFF',
+  accentPressed: '#D9DDEE',
+  /** Text auf Akzentfläche, 17:1 */
+  onAccent: '#0B1026',
   /** Akzent als Linie in der 3D-Szene */
-  accentLine: '#F5B544',
+  accentLine: '#FFFFFF',
 
 } as const;
 
@@ -61,20 +61,23 @@ export const radius = {
   pill: 999,
 } as const;
 
-const mono = Platform.select({ web: 'SpaceMono, ui-monospace, monospace', default: 'SpaceMono' });
-
-/** Typo-Skala. Text in System-Schrift, Messwerte in SpaceMono (nur für Daten). */
+/**
+ * Typo-Skala. Unbounded für Überschriften und Messwerte, Inter für Text.
+ * Eigene Schriften brauchen je Gewicht eine eigene Familie (kein fontWeight).
+ */
 export const type = {
-  display: { fontSize: 34, lineHeight: 40, fontWeight: '700', letterSpacing: -0.6 },
-  title: { fontSize: 24, lineHeight: 30, fontWeight: '700', letterSpacing: -0.3 },
-  heading: { fontSize: 18, lineHeight: 24, fontWeight: '600' },
-  body: { fontSize: 16, lineHeight: 24, fontWeight: '400' },
-  bodySmall: { fontSize: 14, lineHeight: 20, fontWeight: '400' },
-  label: { fontSize: 13, lineHeight: 18, fontWeight: '500' },
-  data: { fontSize: 17, lineHeight: 24, fontFamily: mono, fontVariant: ['tabular-nums'] },
+  display: { fontSize: 34, lineHeight: 42, fontFamily: 'Unbounded_700Bold', letterSpacing: -0.8 },
+  title: { fontSize: 22, lineHeight: 30, fontFamily: 'Unbounded_700Bold', letterSpacing: -0.4 },
+  heading: { fontSize: 18, lineHeight: 24, fontFamily: 'Inter_600SemiBold' },
+  body: { fontSize: 16, lineHeight: 24, fontFamily: 'Inter_400Regular' },
+  bodySmall: { fontSize: 14, lineHeight: 20, fontFamily: 'Inter_400Regular' },
+  label: { fontSize: 13, lineHeight: 18, fontFamily: 'Inter_500Medium' },
+  data: { fontSize: 18, lineHeight: 26, fontFamily: 'Unbounded_500Medium', fontVariant: ['tabular-nums'] },
   /** Handschrift, nur für Bastel-Elemente im Schaukasten */
   hand: { fontSize: 15, lineHeight: 17, fontFamily: 'Caveat_700Bold' },
-  dataSmall: { fontSize: 13, lineHeight: 18, fontFamily: mono, fontVariant: ['tabular-nums'] },
+  dataSmall: { fontSize: 13, lineHeight: 18, fontFamily: 'Unbounded_500Medium', fontVariant: ['tabular-nums'] },
+  /** Text auf Buttons und Chips */
+  button: { fontSize: 15, lineHeight: 20, fontFamily: 'Inter_600SemiBold' },
 } as const;
 
 export const motion = {
