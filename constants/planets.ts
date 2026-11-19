@@ -9,7 +9,7 @@
  * Die Umlaufzeiten (orbitDays) laufen dagegen im echten Verhältnis.
  */
 
-export type PlanetType = 'rocky' | 'gas' | 'ice';
+export type PlanetType = 'rocky' | 'gas' | 'ice' | 'dwarf';
 
 export type SurfaceKind = 'rocky' | 'banded' | 'earth';
 
@@ -62,12 +62,14 @@ export const planetTypeLabel: Record<PlanetType, string> = {
   rocky: 'Gesteinsplanet',
   gas: 'Gasriese',
   ice: 'Eisriese',
+  dwarf: 'Zwergplanet',
 };
 
 export const planetTypeGroupLabel: Record<PlanetType, string> = {
   rocky: 'Gesteinsplaneten',
   gas: 'Gasriesen',
   ice: 'Eisriesen',
+  dwarf: 'Zwergplaneten',
 };
 
 export const planets: Planet[] = [
@@ -355,6 +357,87 @@ export const planets: Planet[] = [
   },
 ];
 
+/**
+ * Zwergplaneten. Bewusst nicht in `planets` und `bodies`: Sie hängen nur im
+ * Schaukasten, nicht im 3D-System und nicht in der Planetenliste.
+ * Werte: NASA Planetary Fact Sheet / Solar System Exploration.
+ */
+export const dwarfPlanets: Planet[] = [
+  {
+    id: 'ceres',
+    name: 'Ceres',
+    type: 'dwarf',
+    tagline: 'Der größte Brocken im Asteroidengürtel, rund genug für einen Zwergplaneten.',
+    description: [
+      'Ceres kreist zwischen Mars und Jupiter und macht allein etwa ein Viertel der Masse des ganzen Asteroidengürtels aus.',
+      'Die Raumsonde Dawn entdeckte im Krater Occator helle Flecken aus Salz. Darunter liegt vermutlich salziges Wasser.',
+    ],
+    facts: {
+      diameterKm: 939,
+      distanceMioKm: 413.7,
+      orbitDays: 1680,
+      orbitLabel: '4,6 Jahre',
+      dayLabel: '9 h 4 min',
+      moons: 0,
+      meanTempC: -105,
+      gravity: 0.28,
+    },
+    scene: {
+      radius: 0.18,
+      orbitRadius: 17.2,
+      tiltDeg: 4,
+      rotationHours: 9.07,
+      startAngleDeg: 60,
+      surface: {
+        kind: 'rocky',
+        colors: ['#8C8780', '#5E5A55', '#B9B3AA'],
+        rim: '#A9A49C',
+      },
+    },
+    swatch: { base: '#8A857E' },
+  },
+  {
+    id: 'pluto',
+    name: 'Pluto',
+    type: 'dwarf',
+    tagline: 'Ganz draußen, mit einem riesigen hellen Herz aus Stickstoffeis.',
+    description: [
+      'Pluto galt bis 2006 als neunter Planet. Er braucht 248 Jahre für eine Runde um die Sonne und kommt ihr dabei mal näher als Neptun.',
+      'Die Sonde New Horizons fotografierte 2015 die helle, herzförmige Ebene Tombaugh Regio. Sein Mond Charon ist halb so groß wie Pluto selbst.',
+    ],
+    facts: {
+      diameterKm: 2377,
+      distanceMioKm: 5906.4,
+      orbitDays: 90560,
+      orbitLabel: '248 Jahre',
+      dayLabel: '6 d 9 h',
+      moons: 5,
+      meanTempC: -225,
+      gravity: 0.62,
+    },
+    scene: {
+      radius: 0.22,
+      orbitRadius: 46,
+      tiltDeg: 122.5,
+      rotationHours: -153.3,
+      startAngleDeg: 200,
+      surface: {
+        // Gebändert nur, weil das Herz als Fleck dort gerechnet wird; Bänder kaum sichtbar
+        kind: 'banded',
+        colors: ['#BFA285', '#9A7A5E', '#D9C7AE'],
+        rim: '#E0CDB6',
+        bandFreq: 3,
+        bandContrast: 0.12,
+        turbulence: 0.8,
+        spot: { lat: 0.1, lon: 0.4, size: 0.7, strength: 0.9, color: '#F1E9DC' },
+      },
+    },
+    swatch: { base: '#BFA488', band: '#EDE3D3' },
+  },
+];
+
+export const isDwarf = (b: Body | null | undefined) => !!b && b.type === 'dwarf';
+
 export const sun = { radius: 3.2 };
 
 export type Star = {
@@ -414,6 +497,11 @@ export function getPlanet(id: string | undefined): Planet | undefined {
 
 export function getBody(id: string | undefined): Body | undefined {
   return bodies.find((b) => b.id === id);
+}
+
+/** Wie getBody, kennt aber auch die Zwergplaneten (nur Schaukasten) */
+export function getBoxBody(id: string | undefined): Body | undefined {
+  return getBody(id) ?? dwarfPlanets.find((b) => b.id === id);
 }
 
 export const bodyTypeLabel = (b: Body) => (b.type === 'star' ? 'Stern' : planetTypeLabel[b.type]);

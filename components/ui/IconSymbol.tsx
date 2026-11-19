@@ -16,6 +16,9 @@ const MAPPING = {
   xmark: 'close',
   scope: 'filter-center-focus',
   'shippingbox.fill': 'inventory-2',
+  'paintbrush.fill': 'brush',
+  'square.and.arrow.up': 'ios-share',
+  checkmark: 'check',
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],

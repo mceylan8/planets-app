@@ -54,7 +54,8 @@
     "react-native-webview": "13.12.5",
     "three": "^0.169.0",
     "use-latest-callback": "^0.2.3",
-    "web-streams-polyfill": "^3.3.3"
+    "web-streams-polyfill": "^3.3.3",
+    "expo-sharing": "~13.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

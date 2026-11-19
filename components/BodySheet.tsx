@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 
 import { AppText, Button, Fact, IconButton, PlanetSwatch } from '@/components/ui/kit';
-import { Body, bodyTypeLabel, quickFacts } from '@/constants/planets';
+import { Body, bodyTypeLabel, isDwarf, quickFacts } from '@/constants/planets';
 import { color, elevation, motion, radius, space } from '@/constants/theme';
 
 /** Schwebende Infokarte zu einem gewählten Körper (System-Tab und Schaukasten). */
@@ -31,12 +31,15 @@ export function BodySheet({ body, onClose }: { body: Body; onClose: () => void }
           <Fact key={f.label} label={f.label} value={f.value} />
         ))}
       </View>
-      <Button
-        label={`${body.name} im Detail`}
-        icon="chevron.right"
-        iconSide="right"
-        onPress={() => router.push({ pathname: '/planet/[id]', params: { id: body.id } })}
-      />
+      {/* Zwergplaneten hängen nur im Schaukasten, eine Detailseite gibt es für sie nicht */}
+      {!isDwarf(body) && (
+        <Button
+          label={`${body.name} im Detail`}
+          icon="chevron.right"
+          iconSide="right"
+          onPress={() => router.push({ pathname: '/planet/[id]', params: { id: body.id } })}
+        />
+      )}
     </Animated.View>
   );
 }
