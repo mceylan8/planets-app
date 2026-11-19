@@ -1,43 +1,42 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { color } from '@/constants/theme';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
+        animation: 'fade',
         tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
+        tabBarActiveTintColor: color.accent,
+        tabBarInactiveTintColor: color.textMuted,
+        tabBarStyle: { backgroundColor: color.surface, borderTopColor: color.border },
+        tabBarLabelStyle: { fontSize: 12, fontWeight: '500' },
+        sceneStyle: { backgroundColor: color.space },
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'System',
+          tabBarIcon: ({ color: c }) => <IconSymbol size={26} name="sun.max.fill" color={c} />,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="box"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Schaukasten',
+          tabBarIcon: ({ color: c }) => <IconSymbol size={26} name="shippingbox.fill" color={c} />,
+        }}
+      />
+      <Tabs.Screen
+        name="planets"
+        options={{
+          title: 'Planeten',
+          tabBarIcon: ({ color: c }) => <IconSymbol size={26} name="list.bullet" color={c} />,
         }}
       />
     </Tabs>
