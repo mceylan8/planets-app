@@ -249,15 +249,16 @@ export function PlanetSwatch({ planet, size }: { planet: Body; size: number }) {
               }}
             />
           ))}
+        {/* Weicher Terminator statt harter Sichel (bei Neptun wirkte das wie ein Mond) */}
         <View
           style={{
             position: 'absolute',
-            width: size,
-            height: size,
-            borderRadius: size / 2,
-            left: size * 0.36,
-            top: -size * 0.06,
-            backgroundColor: 'rgba(5, 6, 10, 0.55)',
+            width: size * 1.15,
+            height: size * 1.15,
+            borderRadius: size,
+            left: size * 0.48,
+            top: -size * 0.1,
+            backgroundColor: 'rgba(5, 6, 10, 0.32)',
           }}
         />
       </View>

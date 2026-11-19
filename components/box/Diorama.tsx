@@ -131,6 +131,8 @@ export function createBoxController() {
     size: { width: 1, height: 1 },
     idle: true,
     selectedId: null as string | null,
+    /** Boxlampe: an = Planeten leuchten, aus = nur Sternenlicht */
+    lampOn: true,
     /** Doppeltipp-Zoom: Ziel-Planet, Fortschritt 0–1 und Grundansicht */
     zoomId: null as string | null,
     zoomT: 0,
@@ -271,8 +273,10 @@ export type BoxController = ReturnType<typeof createBoxController>;
 
 /* ---------- Bausteine ---------- */
 
+/** Licht kommt von der Sonne unten in der Box — sie ist die Lampe. */
 function lamp(layout: Layout) {
-  return new THREE.Vector3(layout.W * 0.15, layout.H * 0.9, layout.D * 2.2);
+  const { sun, H, D } = layout;
+  return new THREE.Vector3(sun.x, -H / 2 + sun.r * 0.55, -D * 0.15);
 }
 
 function useShader(
@@ -303,6 +307,7 @@ function PaperFace({
   tint,
   seed,
   layout,
+  controller,
 }: {
   w: number;
   h: number;
@@ -311,6 +316,7 @@ function PaperFace({
   tint: string;
   seed: number;
   layout: Layout;
+  controller: BoxController;
 }) {
   const material = useShader(paperShader, {
     uColor: { value: srgb(tint) },
@@ -323,6 +329,10 @@ function PaperFace({
     },
     uSeed: { value: seed },
     uLamp: { value: lamp(layout) },
+    uBright: { value: 1 },
+  });
+  useFrame(() => {
+    material.uniforms.uBright.value = controller.lampOn ? 1 : 0;
   });
   return (
     <mesh position={position} rotation={rotation} material={material}>
@@ -331,14 +341,24 @@ function PaperFace({
   );
 }
 
-function BoxShell({ layout }: { layout: Layout }) {
+function BoxShell({
+  layout,
+  controller,
+}: {
+  layout: Layout;
+  controller: BoxController;
+}) {
   const { W, H, D } = layout;
   const t = 0.22;
   const card = useShader(cardboardShader, {
     uColor: { value: srgb('#B8895A') },
     uLamp: { value: lamp(layout) },
+    uBright: { value: 1 },
   });
   const z = D / 2 + t / 2;
+  useFrame(() => {
+    card.uniforms.uBright.value = controller.lampOn ? 1 : 0;
+  });
   return (
     <group>
       <PaperFace
@@ -349,6 +369,7 @@ function BoxShell({ layout }: { layout: Layout }) {
         tint="#1E2A6B"
         seed={1}
         layout={layout}
+        controller={controller}
       />
       <PaperFace
         w={W}
@@ -358,6 +379,7 @@ function BoxShell({ layout }: { layout: Layout }) {
         tint="#1A2460"
         seed={2}
         layout={layout}
+        controller={controller}
       />
       <PaperFace
         w={W}
@@ -367,6 +389,7 @@ function BoxShell({ layout }: { layout: Layout }) {
         tint="#162055"
         seed={3}
         layout={layout}
+        controller={controller}
       />
       <PaperFace
         w={D}
@@ -376,6 +399,7 @@ function BoxShell({ layout }: { layout: Layout }) {
         tint="#1B2664"
         seed={4}
         layout={layout}
+        controller={controller}
       />
       <PaperFace
         w={D}
@@ -385,6 +409,7 @@ function BoxShell({ layout }: { layout: Layout }) {
         tint="#1B2664"
         seed={5}
         layout={layout}
+        controller={controller}
       />
       {/* Kartonrand vorne */}
       <mesh position={[0, H / 2 + t / 2, z]} material={card}>
@@ -437,18 +462,41 @@ const outlineMaterial = new THREE.MeshBasicMaterial({
   side: THREE.BackSide,
 });
 
-function SunDome({ layout }: { layout: Layout }) {
+function SunDome({
+  layout,
+  controller,
+}: {
+  layout: Layout;
+  controller: BoxController;
+}) {
   const { H, D } = layout;
   const { x, r } = layout.sun;
   const material = useShader(papierShader, {
     uMap: { value: placeholder },
     uLamp: { value: lamp(layout) },
     uEmissive: { value: 0.65 },
+    uBright: { value: 1 },
   });
   useBake([bakeJobFor(sunBody, material)]);
   const rayMat = useShader(flatToonShader, {
     uColor: { value: srgb('#F5B544') },
     uLamp: { value: lamp(layout) },
+    uBright: { value: 1 },
+  });
+  const raysGroup = useRef<THREE.Group>(null);
+  useFrame(() => {
+    // Sonne an = Lampe brennt; aus = nur noch ein matter Papprund
+    if (controller.lampOn) {
+      material.uniforms.uEmissive.value = 0.9;
+      material.uniforms.uBright.value = 1;
+      rayMat.uniforms.uBright.value = 1;
+      if (raysGroup.current) raysGroup.current.visible = true;
+    } else {
+      material.uniforms.uEmissive.value = 0.05;
+      material.uniforms.uBright.value = 0.15;
+      rayMat.uniforms.uBright.value = 0;
+      if (raysGroup.current) raysGroup.current.visible = false;
+    }
   });
   const rays = useMemo(() => {
     const out: { angle: number; len: number }[] = [];
@@ -460,21 +508,23 @@ function SunDome({ layout }: { layout: Layout }) {
   const zc = -D * 0.15;
   return (
     <group position={[x, -H / 2, zc]}>
-      {rays.map((ray, i) => (
-        <mesh
-          key={i}
-          position={[
-            Math.cos(ray.angle) * r * (1 + ray.len * 0.45),
-            Math.sin(ray.angle) * r * (1 + ray.len * 0.45),
-            -0.15,
-          ]}
-          rotation={[0, 0, ray.angle - Math.PI / 2]}
-          scale={[1, 1, 0.22]}
-          material={rayMat}
-        >
-          <coneGeometry args={[r * 0.2, r * ray.len, 3]} />
-        </mesh>
-      ))}
+      <group ref={raysGroup}>
+        {rays.map((ray, i) => (
+          <mesh
+            key={i}
+            position={[
+              Math.cos(ray.angle) * r * (1 + ray.len * 0.45),
+              Math.sin(ray.angle) * r * (1 + ray.len * 0.45),
+              -0.15,
+            ]}
+            rotation={[0, 0, ray.angle - Math.PI / 2]}
+            scale={[1, 1, 0.22]}
+            material={rayMat}
+          >
+            <coneGeometry args={[r * 0.2, r * ray.len, 3]} />
+          </mesh>
+        ))}
+      </group>
       <mesh material={material}>
         <sphereGeometry
           args={[r, SEG[0], SEG[1], 0, Math.PI * 2, 0, Math.PI / 2]}
@@ -500,14 +550,15 @@ function HangingPlanet({
   const material = useShader(papierShader, {
     uMap: { value: placeholder },
     uLamp: { value: lamp(controller.layout) },
-    uEmissive: { value: 0 },
+    uEmissive: { value: 0.45 },
+    uBright: { value: 1 },
   });
   useBake([bakeJobFor(body, material)]);
   const rings = isPlanet(body) ? body.scene.rings : undefined;
   const ringMat = useShader(
     ringToonShader,
     {
-      uColor: { value: srgb('#E6D3A6') },
+      uColor: { value: srgb('#D4C49A') },
       uInner: { value: slot.r * 1.3 },
       uOuter: { value: slot.r * 2.1 },
     },
@@ -527,6 +578,7 @@ function HangingPlanet({
     dir.copy(controller.pivot(body.id)).sub(pos).normalize();
     group.current.quaternion.setFromUnitVectors(UP, dir);
     if (spinner.current) spinner.current.rotation.y = p.spin;
+    material.uniforms.uBright.value = controller.lampOn ? 1 : 0;
   });
 
   return (
@@ -535,6 +587,7 @@ function HangingPlanet({
         planetId={body.id}
         radius={slot.r}
         layout={controller.layout}
+        controller={controller}
       />
       <group rotation={[0, 0, tilt * 0.35]}>
         <group ref={spinner}>
@@ -596,7 +649,8 @@ function stickHeight(r: number) {
 
 /** Wo der Faden über dem Planeten das Namensschild trägt (über dem Stab, falls vorhanden) */
 function tagHeight(id: string, r: number) {
-  return (MOONS[id]?.length ? stickHeight(r) : r) + 0.5;
+  // Extra Abstand, damit das hängende Papier die Kugel nicht verdeckt
+  return (MOONS[id]?.length ? stickHeight(r) : r) + 1.05;
 }
 
 /**
@@ -607,10 +661,12 @@ function MoonMobile({
   planetId,
   radius,
   layout,
+  controller,
 }: {
   planetId: string;
   radius: number;
   layout: Layout;
+  controller: BoxController;
 }) {
   const moons = MOONS[planetId] ?? [];
   const y = stickHeight(radius);
@@ -657,6 +713,7 @@ function MoonMobile({
         uniforms: {
           uColor: { value: srgb('#A97C50') },
           uLamp: { value: lamp(layout) },
+          uBright: { value: 1 },
         },
       }),
       moonMats: hangs.map(
@@ -667,6 +724,7 @@ function MoonMobile({
             uniforms: {
               uColor: { value: srgb(h.color) },
               uLamp: { value: lamp(layout) },
+              uBright: { value: 1 },
             },
           })
       ),
@@ -682,6 +740,14 @@ function MoonMobile({
     },
     [strings, woodMat, moonMats]
   );
+
+  useFrame(() => {
+    const b = controller.lampOn ? 1 : 0;
+    woodMat.uniforms.uBright.value = b;
+    moonMats.forEach((m) => {
+      m.uniforms.uBright.value = b;
+    });
+  });
 
   if (!hangs.length) return null;
   return (
@@ -851,9 +917,10 @@ function Rig({
       const e = z * z * (3 - 2 * z);
       if (e > 0.001) {
         const id = controller.zoomId ?? controller.lastZoomId;
-        const tgt = controller.positions[id ?? ''];
-        if (tgt) {
-          const r = controller.layout.slots[id!].r;
+        const slot = id ? controller.layout.slots[id] : null;
+        const tgt = id ? controller.positions[id] : null;
+        if (tgt && slot) {
+          const r = slot.r;
           const reach = (MOONS[id!]?.length ? r + 0.38 + 0.4 : r) * 3.4 + 1.2;
           zoomPos
             .copy(controller.base.pos)
@@ -861,8 +928,11 @@ function Rig({
             .normalize()
             .multiplyScalar(reach)
             .add(tgt);
+          // Bei offener Detailkarte Planet nach oben im Bild schieben
+          if (controller.selectedId) zoomPos.y += r * 0.55;
           cam.position.lerpVectors(controller.base.pos, zoomPos, e);
           lookAt.lerpVectors(controller.base.target, tgt, e);
+          if (controller.selectedId) lookAt.y -= r * 0.9;
           cam.lookAt(lookAt);
         }
       } else {
@@ -1039,8 +1109,8 @@ export function Diorama({
             camera={{ fov: 38, near: 0.1, far: 200, position: [0, 0, 20] }}
           >
             <color attach="background" args={[color.space]} />
-            <BoxShell layout={layout} />
-            <SunDome layout={layout} />
+            <BoxShell layout={layout} controller={controller} />
+            <SunDome layout={layout} controller={controller} />
             {bodies.filter(isPlanet).map((b) => (
               <React.Fragment key={b.id}>
                 <HangingPlanet body={b} controller={controller} />
@@ -1108,7 +1178,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#EDE6D6',
     marginTop: -2,
   },
-  tagString: { width: 1, height: 9, backgroundColor: '#EDE6D6' },
+  tagString: { width: 1, height: 14, backgroundColor: '#EDE6D6' },
   tagText: {
     ...(type.hand as object),
     fontSize: 19,

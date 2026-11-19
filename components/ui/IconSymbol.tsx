@@ -16,6 +16,8 @@ const MAPPING = {
   xmark: 'close',
   scope: 'filter-center-focus',
   'shippingbox.fill': 'inventory-2',
+  'lightbulb.fill': 'lightbulb',
+  lightbulb: 'lightbulb-outline',
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],

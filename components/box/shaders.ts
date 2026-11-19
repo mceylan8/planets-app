@@ -57,6 +57,7 @@ uniform vec3 uStar;
 uniform vec2 uCells;
 uniform float uSeed;
 uniform vec3 uLamp;
+uniform float uBright;
 varying vec3 vN;
 varying vec3 vWorld;
 varying vec3 vObj;
@@ -84,6 +85,7 @@ void main() {
 
   // Licht der Lampe und dunklere Ecken (wie in einer echten Box)
   float lamp = 0.62 + 0.38 * max(dot(normalize(vN), normalize(uLamp - vWorld)), 0.0);
+  lamp = mix(0.28, lamp, uBright);
   vec2 e = min(vUv, 1.0 - vUv);
   float corner = smoothstep(0.0, 0.18, min(e.x, e.y));
   col *= lamp * mix(0.62, 1.0, corner);
@@ -98,6 +100,7 @@ export const cardboardShader = {
   fragment: /* glsl */ `
 uniform vec3 uColor;
 uniform vec3 uLamp;
+uniform float uBright;
 varying vec3 vN;
 varying vec3 vWorld;
 varying vec3 vObj;
@@ -107,6 +110,7 @@ void main() {
   float grain = noise(vWorld * 14.0) * 0.1;
   float ribs = 0.04 * sin(vWorld.x * 60.0 + vWorld.y * 60.0);
   float lamp = 0.7 + 0.3 * max(dot(normalize(vN), normalize(uLamp - vWorld)), 0.0);
+  lamp = mix(0.32, lamp, uBright);
   gl_FragColor = vec4(uColor * (0.92 + grain + ribs) * lamp, 1.0);
 }
 `,
@@ -119,6 +123,7 @@ export const papierShader = {
 uniform sampler2D uMap;
 uniform vec3 uLamp;
 uniform float uEmissive;
+uniform float uBright;
 varying vec3 vN;
 varying vec3 vWorld;
 varying vec3 vObj;
@@ -138,10 +143,15 @@ void main() {
   vec3 bump = vec3(noise(vObj * 7.0), noise(vObj * 7.0 + 4.3), noise(vObj * 7.0 + 9.1)) - 0.5;
   vec3 N = normalize(normalize(vN) + bump * 0.35);
   vec3 L = normalize(uLamp - vWorld);
-  float light = mix(toon(dot(N, L)), 1.0, uEmissive);
+  float lit = toon(dot(N, L));
+  // Lampe aus: nur Restlicht; Lampe an: Toon + Eigenleuchten
+  lit = mix(0.22, lit, uBright);
+  float light = mix(lit, 1.0, uEmissive * uBright);
   vec3 V = normalize(cameraPosition - vWorld);
-  float rim = smoothstep(0.62, 0.8, 1.0 - max(dot(normalize(vN), V), 0.0)) * 0.12;
-  gl_FragColor = vec4(col * light + rim, 1.0);
+  float rim = smoothstep(0.62, 0.8, 1.0 - max(dot(normalize(vN), V), 0.0)) * 0.12 * uBright;
+  // Leichtes Eigenleuchten, wenn die Sonne unten brennt
+  vec3 glow = col * uEmissive * uBright * 0.35;
+  gl_FragColor = vec4(col * light + rim + glow, 1.0);
 }
 `,
 };
@@ -152,6 +162,7 @@ export const flatToonShader = {
   fragment: /* glsl */ `
 uniform vec3 uColor;
 uniform vec3 uLamp;
+uniform float uBright;
 varying vec3 vN;
 varying vec3 vWorld;
 varying vec3 vObj;
@@ -161,12 +172,13 @@ ${toon}
 void main() {
   float grain = noise(vWorld * 12.0) * 0.06;
   float light = toon(dot(normalize(vN), normalize(uLamp - vWorld)));
-  gl_FragColor = vec4(uColor * (light * 0.6 + 0.4) * (0.97 + grain), 1.0);
+  light = mix(0.25, light * 0.6 + 0.4, uBright);
+  gl_FragColor = vec4(uColor * light * (0.97 + grain), 1.0);
 }
 `,
 };
 
-/** Saturnring aus Pappe, leicht schimmernd je nach Blickwinkel */
+/** Saturnring aus Pappe, warmer Sandton mit leichtem Glanz */
 export const ringToonShader = {
   vertex: litVertex,
   fragment: /* glsl */ `
@@ -183,8 +195,10 @@ void main() {
   float bands = step(0.5, fract(t * 4.0)) * 0.12;
   vec3 V = normalize(cameraPosition - vWorld);
   float f = abs(dot(normalize(vN), V));
-  vec3 sheen = 0.5 + 0.5 * cos(6.28 * (f * 1.3 + vec3(0.0, 0.33, 0.67)));
-  vec3 col = mix(uColor * (0.95 + bands), sheen, 0.25);
+  // Warmer Sand-Schimmer statt Regenbogen (der wirkte hellgrün)
+  vec3 warm = vec3(0.9, 0.82, 0.62);
+  vec3 sheen = mix(uColor, warm, 0.35) * (0.88 + 0.2 * f);
+  vec3 col = mix(uColor * (0.95 + bands), sheen, 0.2);
   float edge = smoothstep(0.0, 0.04, t) * (1.0 - smoothstep(0.96, 1.0, t));
   gl_FragColor = vec4(col, edge * 0.95);
 }

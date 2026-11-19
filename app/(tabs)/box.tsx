@@ -4,14 +4,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BodySheet } from '@/components/BodySheet';
 import { Diorama, createBoxController } from '@/components/box/Diorama';
-import { AppText } from '@/components/ui/kit';
-import { Body, getBody } from '@/constants/planets';
+import { AppText, IconButton } from '@/components/ui/kit';
+import { Body, getBody, isPlanet } from '@/constants/planets';
 import { color, space } from '@/constants/theme';
 
 export default function BoxScreen() {
   const controller = useMemo(createBoxController, []);
   const insets = useSafeAreaInsets();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [lampOn, setLampOn] = useState(true);
   const selected = selectedId ? (getBody(selectedId) ?? null) : null;
 
   // Bei „Bewegung reduzieren“ kein ständiges Wiegen
@@ -26,20 +27,39 @@ export default function BoxScreen() {
   const select = useCallback(
     (b: Body | null) => {
       controller.selectedId = b?.id ?? null;
+      // Detailkarte: auf den Planeten zoomen, damit er nicht hinter der Karte verschwindet
+      controller.zoomId = b && isPlanet(b) ? b.id : null;
       setSelectedId(b?.id ?? null);
     },
     [controller]
   );
 
+  const toggleLamp = useCallback(() => {
+    const next = !controller.lampOn;
+    controller.lampOn = next;
+    setLampOn(next);
+  }, [controller]);
+
   return (
     <View style={styles.root}>
       <View style={[styles.header, { paddingTop: insets.top + space.md }]}>
-        <AppText variant="title" accessibilityRole="header">
-          Schaukasten
-        </AppText>
-        <AppText variant="bodySmall" tone="muted">
-          Ziehen zum Schwingen, doppelt tippen zum Zoomen
-        </AppText>
+        <View style={styles.headerRow}>
+          <View style={styles.headerText}>
+            <AppText variant="title" accessibilityRole="header">
+              Schaukasten
+            </AppText>
+            <AppText variant="bodySmall" tone="muted">
+              Ziehen zum Schwingen, doppelt tippen zum Zoomen
+            </AppText>
+          </View>
+          <View style={!lampOn ? styles.lampOff : undefined}>
+            <IconButton
+              icon="sun.max.fill"
+              label={lampOn ? 'Sonne ausschalten' : 'Sonne einschalten'}
+              onPress={toggleLamp}
+            />
+          </View>
+        </View>
       </View>
       <View style={styles.stage}>
         <Diorama controller={controller} onPick={select} />
@@ -55,7 +75,10 @@ export default function BoxScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.space },
-  header: { paddingHorizontal: space.md, paddingBottom: space.sm, gap: 2 },
+  header: { paddingHorizontal: space.md, paddingBottom: space.sm },
+  headerRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  headerText: { flex: 1, minWidth: 0, gap: 2 },
+  lampOff: { opacity: 0.4 },
   stage: { flex: 1 },
   sheetWrap: { position: 'absolute', left: 0, right: 0, bottom: space.md },
 });
