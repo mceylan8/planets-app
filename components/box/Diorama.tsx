@@ -122,6 +122,9 @@ type Pendulum = {
   phase: number;
 };
 
+/** Licht im Schaukasten: alles, nur die Planeten oder nur die Sonne */
+export type LampMode = 'all' | 'planets' | 'sun';
+
 export function createBoxController() {
   const c = {
     layout: layoutFor(1),
@@ -131,8 +134,8 @@ export function createBoxController() {
     size: { width: 1, height: 1 },
     idle: true,
     selectedId: null as string | null,
-    /** Boxlampe: an = Planeten leuchten, aus = nur Sternenlicht */
-    lampOn: true,
+    /** Sonne unten als Lampe: alles / nur Planeten / nur Sonne */
+    lampMode: 'all' as LampMode,
     /** Doppeltipp-Zoom: Ziel-Planet, Fortschritt 0–1 und Grundansicht */
     zoomId: null as string | null,
     zoomT: 0,
@@ -279,6 +282,14 @@ function lamp(layout: Layout) {
   return new THREE.Vector3(sun.x, -H / 2 + sun.r * 0.55, -D * 0.15);
 }
 
+function sunLit(mode: LampMode) {
+  return mode === 'all' || mode === 'sun';
+}
+
+function planetsLit(mode: LampMode) {
+  return mode === 'all' || mode === 'planets';
+}
+
 function useShader(
   def: { vertex: string; fragment: string },
   uniforms: Record<string, THREE.IUniform>,
@@ -332,7 +343,8 @@ function PaperFace({
     uBright: { value: 1 },
   });
   useFrame(() => {
-    material.uniforms.uBright.value = controller.lampOn ? 1 : 0;
+    // Wände hell, wenn die Sonne brennt
+    material.uniforms.uBright.value = sunLit(controller.lampMode) ? 1 : 0;
   });
   return (
     <mesh position={position} rotation={rotation} material={material}>
@@ -357,7 +369,7 @@ function BoxShell({
   });
   const z = D / 2 + t / 2;
   useFrame(() => {
-    card.uniforms.uBright.value = controller.lampOn ? 1 : 0;
+    card.uniforms.uBright.value = sunLit(controller.lampMode) ? 1 : 0;
   });
   return (
     <group>
@@ -485,18 +497,11 @@ function SunDome({
   });
   const raysGroup = useRef<THREE.Group>(null);
   useFrame(() => {
-    // Sonne an = Lampe brennt; aus = nur noch ein matter Papprund
-    if (controller.lampOn) {
-      material.uniforms.uEmissive.value = 0.9;
-      material.uniforms.uBright.value = 1;
-      rayMat.uniforms.uBright.value = 1;
-      if (raysGroup.current) raysGroup.current.visible = true;
-    } else {
-      material.uniforms.uEmissive.value = 0.05;
-      material.uniforms.uBright.value = 0.15;
-      rayMat.uniforms.uBright.value = 0;
-      if (raysGroup.current) raysGroup.current.visible = false;
-    }
+    const on = sunLit(controller.lampMode);
+    material.uniforms.uEmissive.value = on ? 0.9 : 0.05;
+    material.uniforms.uBright.value = on ? 1 : 0.15;
+    rayMat.uniforms.uBright.value = on ? 1 : 0;
+    if (raysGroup.current) raysGroup.current.visible = on;
   });
   const rays = useMemo(() => {
     const out: { angle: number; len: number }[] = [];
@@ -578,7 +583,14 @@ function HangingPlanet({
     dir.copy(controller.pivot(body.id)).sub(pos).normalize();
     group.current.quaternion.setFromUnitVectors(UP, dir);
     if (spinner.current) spinner.current.rotation.y = p.spin;
-    material.uniforms.uBright.value = controller.lampOn ? 1 : 0;
+    const mode = controller.lampMode;
+    // Sonne an → von unten beleuchtet; Planeten-Modus → Eigenleuchten
+    material.uniforms.uBright.value = sunLit(mode) || planetsLit(mode) ? 1 : 0;
+    material.uniforms.uEmissive.value = planetsLit(mode)
+      ? mode === 'planets'
+        ? 0.7
+        : 0.45
+      : 0;
   });
 
   return (
@@ -742,7 +754,8 @@ function MoonMobile({
   );
 
   useFrame(() => {
-    const b = controller.lampOn ? 1 : 0;
+    const b =
+      sunLit(controller.lampMode) || planetsLit(controller.lampMode) ? 1 : 0;
     woodMat.uniforms.uBright.value = b;
     moonMats.forEach((m) => {
       m.uniforms.uBright.value = b;

@@ -3,18 +3,28 @@ import { AccessibilityInfo, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BodySheet } from '@/components/BodySheet';
-import { Diorama, createBoxController } from '@/components/box/Diorama';
+import {
+  Diorama,
+  LampMode,
+  createBoxController,
+} from '@/components/box/Diorama';
 import { useTabBarOffset } from '@/components/ui/AppTabBar';
-import { AppText, IconButton } from '@/components/ui/kit';
+import { AppText, SegmentedControl } from '@/components/ui/kit';
 import { Body, getBody, isPlanet } from '@/constants/planets';
 import { color, space } from '@/constants/theme';
+
+const lampModes: { value: LampMode; label: string; a11y: string }[] = [
+  { value: 'all', label: 'Alles', a11y: 'Alles leuchtet' },
+  { value: 'planets', label: 'Planeten', a11y: 'Nur Planeten leuchten' },
+  { value: 'sun', label: 'Sonne', a11y: 'Nur Sonne leuchtet' },
+];
 
 export default function BoxScreen() {
   const controller = useMemo(createBoxController, []);
   const insets = useSafeAreaInsets();
   const tabOffset = useTabBarOffset();
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [lampOn, setLampOn] = useState(true);
+  const [lampMode, setLampMode] = useState<LampMode>('all');
   const selected = selectedId ? (getBody(selectedId) ?? null) : null;
 
   // Bei „Bewegung reduzieren“ kein ständiges Wiegen
@@ -36,11 +46,13 @@ export default function BoxScreen() {
     [controller]
   );
 
-  const toggleLamp = useCallback(() => {
-    const next = !controller.lampOn;
-    controller.lampOn = next;
-    setLampOn(next);
-  }, [controller]);
+  const changeLamp = useCallback(
+    (mode: LampMode) => {
+      controller.lampMode = mode;
+      setLampMode(mode);
+    },
+    [controller]
+  );
 
   return (
     <View style={styles.root}>
@@ -54,13 +66,12 @@ export default function BoxScreen() {
               Ziehen zum Schwingen, doppelt tippen zum Zoomen
             </AppText>
           </View>
-          <View style={!lampOn ? styles.lampOff : undefined}>
-            <IconButton
-              icon="sun.max.fill"
-              label={lampOn ? 'Sonne ausschalten' : 'Sonne einschalten'}
-              onPress={toggleLamp}
-            />
-          </View>
+          <SegmentedControl
+            label="Licht"
+            options={lampModes}
+            value={lampMode}
+            onChange={changeLamp}
+          />
         </View>
       </View>
       <View style={styles.stage}>
@@ -81,9 +92,14 @@ export default function BoxScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.space },
   header: { paddingHorizontal: space.md, paddingBottom: space.sm },
-  headerRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  headerText: { flex: 1, minWidth: 0, gap: 2 },
-  lampOff: { opacity: 0.4 },
+  headerRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: space.sm,
+  },
+  headerText: { flex: 1, minWidth: 160, gap: 2 },
   stage: { flex: 1 },
   sheetWrap: { position: 'absolute', left: 0, right: 0 },
 });
