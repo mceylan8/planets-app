@@ -5,17 +5,16 @@ Explore fascinating details about Mercury, Venus, Earth, and beyond, all wrapped
 
 ---
 
-## 🎥 Demo
-
-![App Demo](https://via.placeholder.com/800x400?text=Insert+GIF+here)  
----
-
 ## 🚀 Features
 
-- 🌍 **Interactive List**: Explore all the planets with images, names, and descriptions.
-- 🌌 **Sleek Design**: A clean, intuitive UI built with `ParallaxScrollView` and themed components.
-- 📱 **Cross-Platform**: Runs on Android, iOS, and Web using Expo.
-- 🔄 **Fast Refresh**: Instant updates as you code.
+- 🪐 **Interactive 3D solar system** (Three.js via react-three-fiber): the Sun and all eight planets orbit with their real period ratios. Drag to rotate, pinch / scroll wheel / +− buttons to zoom.
+- 🎯 **Tap a planet**: the camera flies over and follows it, and an info card shows the key facts.
+- 🎨 **Procedural surfaces, no textures**: banded gas giants with Jupiter's Great Red Spot, Earth with oceans, clouds and polar caps, Saturn's rings with the Cassini division, Uranus tipped on its side, the Moon orbiting Earth.
+- 📋 **Planet list and detail pages**, grouped into rocky planets, gas giants and ice giants, with NASA data.
+- ⏯️ **Speed control**: pause, 1× (one Earth year in 40 s), 5×.
+- 📱 **Cross-platform**: iOS, Android (via `expo-gl`) and web.
+
+The design system (tokens, components, rules) is documented in [DESIGN.md](DESIGN.md).
 
 ---
 
@@ -44,14 +43,6 @@ You'll see a QR code in the terminal. Open it with the [Expo Go](https://expo.de
 
 ---
 
-## 📸 Screenshots
-
-| Home Screen | Planet List | Planet Detail |
-|-------------|-------------|---------------|
-| ![Home](https://via.placeholder.com/200x400?text=Home+Screen) | ![List](https://via.placeholder.com/200x400?text=Planet+List) | ![Detail](https://via.placeholder.com/200x400?text=Planet+Detail) |
-
----
-
 ## 🌟 How to Use
 
 1. Open the app using one of the following methods:
@@ -59,23 +50,17 @@ You'll see a QR code in the terminal. Open it with the [Expo Go](https://expo.de
    - **iOS Simulator**: Press `i` in the terminal.
    - **Android Emulator**: Press `a` in the terminal.
 
-2. Swipe through the list to explore the planets.
+2. **System** tab: drag to rotate, zoom, tap a planet or pick one from the bar at the bottom.
 
-3. Tap on a planet to learn more about it.
+3. **Planets** tab: browse all eight planets and open a detail page.
+
+> After pulling these changes, rebuild the native app once (`npx expo run:ios` / `run:android`), because `expo-gl` is a new native module.
 
 ---
 
 ## 🧑‍💻 Development
 
 This app uses Expo's **file-based routing** for clean navigation. Modify the files in the `app` directory to customize the app.
-
-### Reset to a fresh project
-
-Run the following command to clear the project and start fresh:
-
-```bash
-npm run reset-project
-```
 
 ---
 
