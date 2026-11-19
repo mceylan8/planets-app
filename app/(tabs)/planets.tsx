@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useTabBarOffset } from '@/components/ui/AppTabBar';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { AppText, PressableScale } from '@/components/ui/kit';
 import { thumbs } from '@/constants/thumbs';
@@ -71,6 +72,7 @@ function PlanetRow({
 
 export default function PlanetsScreen() {
   const insets = useSafeAreaInsets();
+  const tabOffset = useTabBarOffset();
   const { width } = useWindowDimensions();
 
   return (
@@ -78,7 +80,10 @@ export default function PlanetsScreen() {
       style={styles.root}
       contentContainerStyle={[
         styles.content,
-        { paddingTop: insets.top + space.xl },
+        {
+          paddingTop: insets.top + space.xl,
+          paddingBottom: tabOffset + space.xl,
+        },
       ]}
     >
       <View style={styles.inner}>
@@ -122,7 +127,6 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.space },
   content: {
     paddingHorizontal: space.md,
-    paddingBottom: space.xxxl,
     alignItems: 'center',
   },
   inner: { width: '100%', maxWidth: 720 },

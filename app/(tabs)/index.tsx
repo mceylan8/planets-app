@@ -14,6 +14,7 @@ import {
   createCameraController,
 } from '@/components/solar/SolarSystem';
 import { BodySheet } from '@/components/BodySheet';
+import { useTabBarOffset } from '@/components/ui/AppTabBar';
 import {
   AppText,
   IconButton,
@@ -34,6 +35,7 @@ export default function SystemScreen() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [speed, setSpeed] = useState(1);
   const insets = useSafeAreaInsets();
+  const tabOffset = useTabBarOffset();
   const { focus, t } = useLocalSearchParams<{ focus?: string; t?: string }>();
   const selected = selectedId ? (getBody(selectedId) ?? null) : null;
   const chipsRef = useRef<ScrollView>(null);
@@ -134,9 +136,10 @@ export default function SystemScreen() {
 
         <View
           pointerEvents="box-none"
-          style={styles.bottom}
+          style={[styles.bottom, { bottom: tabOffset + space.xs }]}
           onLayout={(e) => {
-            controller.insets.bottom = e.nativeEvent.layout.height;
+            controller.insets.bottom =
+              e.nativeEvent.layout.height + tabOffset + space.xs;
           }}
         >
           {selected && (
@@ -189,13 +192,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 0,
     gap: space.sm,
   },
   chipScroller: { flexGrow: 0 },
   chips: {
     paddingHorizontal: space.md,
-    paddingBottom: space.md,
+    paddingBottom: space.xs,
     gap: space.xs,
   },
 });

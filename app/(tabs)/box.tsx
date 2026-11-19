@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BodySheet } from '@/components/BodySheet';
 import { Diorama, createBoxController } from '@/components/box/Diorama';
+import { useTabBarOffset } from '@/components/ui/AppTabBar';
 import { AppText, IconButton } from '@/components/ui/kit';
 import { Body, getBody, isPlanet } from '@/constants/planets';
 import { color, space } from '@/constants/theme';
@@ -11,6 +12,7 @@ import { color, space } from '@/constants/theme';
 export default function BoxScreen() {
   const controller = useMemo(createBoxController, []);
   const insets = useSafeAreaInsets();
+  const tabOffset = useTabBarOffset();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [lampOn, setLampOn] = useState(true);
   const selected = selectedId ? (getBody(selectedId) ?? null) : null;
@@ -65,7 +67,10 @@ export default function BoxScreen() {
         <Diorama controller={controller} onPick={select} />
       </View>
       {selected && (
-        <View pointerEvents="box-none" style={styles.sheetWrap}>
+        <View
+          pointerEvents="box-none"
+          style={[styles.sheetWrap, { bottom: tabOffset + space.sm }]}
+        >
           <BodySheet body={selected} onClose={() => select(null)} />
         </View>
       )}
@@ -80,5 +85,5 @@ const styles = StyleSheet.create({
   headerText: { flex: 1, minWidth: 0, gap: 2 },
   lampOff: { opacity: 0.4 },
   stage: { flex: 1 },
-  sheetWrap: { position: 'absolute', left: 0, right: 0, bottom: space.md },
+  sheetWrap: { position: 'absolute', left: 0, right: 0 },
 });
