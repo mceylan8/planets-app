@@ -15,15 +15,17 @@ export const TAB_BAR_HEIGHT = 60;
 
 /** Abstand vom unteren Bildrand bis Oberkante der schwebenden Leiste */
 export function useTabBarOffset() {
+  return TAB_BAR_HEIGHT + useTabBarBottom();
+}
+
+/** Abstand unter der Leiste. Web/Safari liefert oft 0 — Mindestabstand, damit nichts unter die Browser-Leiste rutscht */
+function useTabBarBottom() {
   const insets = useSafeAreaInsets();
-  const bottom = Math.max(insets.bottom, Platform.OS === 'web' ? 12 : 8);
-  return TAB_BAR_HEIGHT + bottom;
+  return Math.max(insets.bottom, Platform.OS === 'web' ? 12 : 8);
 }
 
 export function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
-  const insets = useSafeAreaInsets();
-  // Web/Safari liefert oft 0 — Mindestabstand, damit nichts unter die Browser-Leiste rutscht
-  const bottom = Math.max(insets.bottom, Platform.OS === 'web' ? 12 : 8);
+  const bottom = useTabBarBottom();
 
   return (
     <View pointerEvents="box-none" style={[styles.wrap, { paddingBottom: bottom }]}>
@@ -35,7 +37,9 @@ export function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps)
             typeof options.tabBarLabel === 'string'
               ? options.tabBarLabel
               : options.title ?? route.name;
-          const colorTint = focused ? color.accent : color.textMuted;
+          const colorTint = focused
+            ? (options.tabBarActiveTintColor ?? color.accent)
+            : (options.tabBarInactiveTintColor ?? color.textMuted);
           const onPress = () => {
             if (process.env.EXPO_OS === 'ios') {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

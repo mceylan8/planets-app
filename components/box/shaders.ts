@@ -124,6 +124,7 @@ uniform sampler2D uMap;
 uniform vec3 uLamp;
 uniform float uEmissive;
 uniform float uBright;
+uniform float uFlat;
 varying vec3 vN;
 varying vec3 vWorld;
 varying vec3 vObj;
@@ -143,7 +144,8 @@ void main() {
   vec3 bump = vec3(noise(vObj * 7.0), noise(vObj * 7.0 + 4.3), noise(vObj * 7.0 + 9.1)) - 0.5;
   vec3 N = normalize(normalize(vN) + bump * 0.35);
   vec3 L = normalize(uLamp - vWorld);
-  float lit = toon(dot(N, L));
+  // uFlat: 0 = Toon-Licht von der Sonne, 1 = gleichmäßig von innen (Sonne aus)
+  float lit = mix(toon(dot(N, L)), 0.8, uFlat);
   // Lampe aus: nur Restlicht; Lampe an: Toon + Eigenleuchten
   lit = mix(0.22, lit, uBright);
   float light = mix(lit, 1.0, uEmissive * uBright);
@@ -163,6 +165,7 @@ export const flatToonShader = {
 uniform vec3 uColor;
 uniform vec3 uLamp;
 uniform float uBright;
+uniform float uFlat;
 varying vec3 vN;
 varying vec3 vWorld;
 varying vec3 vObj;
@@ -172,7 +175,8 @@ ${toon}
 void main() {
   float grain = noise(vWorld * 12.0) * 0.06;
   float light = toon(dot(normalize(vN), normalize(uLamp - vWorld)));
-  light = mix(0.25, light * 0.6 + 0.4, uBright);
+  // uFlat: 0 = Licht von der Sonne, 1 = gleichmäßig (Sonne aus)
+  light = mix(0.25, mix(light * 0.6 + 0.4, 0.75, uFlat), uBright);
   gl_FragColor = vec4(uColor * light * (0.97 + grain), 1.0);
 }
 `,

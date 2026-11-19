@@ -557,6 +557,7 @@ function HangingPlanet({
     uLamp: { value: lamp(controller.layout) },
     uEmissive: { value: 0.45 },
     uBright: { value: 1 },
+    uFlat: { value: 0 },
   });
   useBake([bakeJobFor(body, material)]);
   const rings = isPlanet(body) ? body.scene.rings : undefined;
@@ -586,6 +587,8 @@ function HangingPlanet({
     const mode = controller.lampMode;
     // Sonne an → von unten beleuchtet; Planeten-Modus → Eigenleuchten
     material.uniforms.uBright.value = sunLit(mode) || planetsLit(mode) ? 1 : 0;
+    // Sonne aus → kein gerichtetes Licht von unten, Planeten leuchten gleichmäßig
+    material.uniforms.uFlat.value = sunLit(mode) ? 0 : 1;
     material.uniforms.uEmissive.value = planetsLit(mode)
       ? mode === 'planets'
         ? 0.7
@@ -726,6 +729,7 @@ function MoonMobile({
           uColor: { value: srgb('#A97C50') },
           uLamp: { value: lamp(layout) },
           uBright: { value: 1 },
+          uFlat: { value: 0 },
         },
       }),
       moonMats: hangs.map(
@@ -737,6 +741,7 @@ function MoonMobile({
               uColor: { value: srgb(h.color) },
               uLamp: { value: lamp(layout) },
               uBright: { value: 1 },
+              uFlat: { value: 0 },
             },
           })
       ),
@@ -754,11 +759,14 @@ function MoonMobile({
   );
 
   useFrame(() => {
-    const b =
-      sunLit(controller.lampMode) || planetsLit(controller.lampMode) ? 1 : 0;
+    const mode = controller.lampMode;
+    const b = sunLit(mode) || planetsLit(mode) ? 1 : 0;
+    const flat = sunLit(mode) ? 0 : 1;
     woodMat.uniforms.uBright.value = b;
+    woodMat.uniforms.uFlat.value = flat;
     moonMats.forEach((m) => {
       m.uniforms.uBright.value = b;
+      m.uniforms.uFlat.value = flat;
     });
   });
 
