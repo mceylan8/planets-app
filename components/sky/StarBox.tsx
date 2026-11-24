@@ -375,8 +375,8 @@ void main() {
   col *= lamp * mix(0.62, 1.0, corner);
   // Leuchtsticker: im Dunkeln nur ein Hauch
   col += uStar * star * uGlow * 0.16;
-  // Animation: der Karton tritt zurück, dahinter nur Nacht
-  col = mix(col, vec3(0.012, 0.016, 0.04), uOpen * 0.9);
+  // Animation: der Karton tritt zurück, dahinter nur schwarze Nacht
+  col = mix(col, vec3(0.0), uOpen);
 
   // Milchstraße als Band einmal rund um den Himmel, dreht mit
   if (uMilky > 0.002) {
@@ -1505,6 +1505,19 @@ function MeteorShowers({ layout, ctl }: { layout: Layout; ctl: SkyController }) 
   );
 }
 
+const SPACE = new THREE.Color(color.space);
+const BLACK = new THREE.Color('#000000');
+
+/** Himmel öffnen: der ganze Hintergrund wird weich schwarz */
+function NightBackground({ ctl }: { ctl: SkyController }) {
+  const scene = useThree((s) => s.scene);
+  useFrame(() => {
+    const bg = scene.background;
+    if (bg instanceof THREE.Color) bg.copy(SPACE).lerp(BLACK, ease(ctl.animT));
+  });
+  return null;
+}
+
 const TILT = (23.4 * Math.PI) / 180;
 
 /**
@@ -1765,6 +1778,7 @@ export function StarBox({
           camera={{ fov: 38, near: 0.1, far: 200, position: [0, 0, 20] }}
         >
           <color attach="background" args={[color.space]} />
+          <NightBackground ctl={ctl} />
           <Rig layout={layout} ctl={ctl} />
           <Carton layout={layout} ctl={ctl} />
           <StarDust layout={layout} ctl={ctl} />

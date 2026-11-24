@@ -294,7 +294,7 @@ export default function SkyScreen() {
   }, [params.enable, params.t]);
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, settings.motion === 'fly' && styles.night]}>
       <SceneHeader
         title="Sternenkasten"
         hint="Ziehen zum Drehen, Sternbild antippen"
@@ -348,6 +348,7 @@ export default function SkyScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.space },
+  night: { backgroundColor: '#000000' },
   stage: { flex: 1 },
   bottom: {
     position: 'absolute',
