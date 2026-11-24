@@ -21,8 +21,8 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'System',
-          tabBarIcon: ({ color: c }) => (
-            <IconSymbol size={22} name="sun.max.fill" color={c} />
+          tabBarIcon: ({ color: c, focused }) => (
+            <IconSymbol size={22} name={focused ? 'sun.max.fill' : 'sun.max'} color={c} />
           ),
         }}
       />
@@ -30,17 +30,26 @@ export default function TabLayout() {
         name="box"
         options={{
           title: 'Schaukasten',
-          tabBarIcon: ({ color: c }) => (
-            <IconSymbol size={22} name="shippingbox.fill" color={c} />
+          tabBarIcon: ({ color: c, focused }) => (
+            <IconSymbol size={22} name={focused ? 'shippingbox.fill' : 'shippingbox'} color={c} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="sky"
+        options={{
+          title: 'Sterne',
+          tabBarIcon: ({ color: c, focused }) => (
+            <IconSymbol size={22} name={focused ? 'moon.stars.fill' : 'moon.stars'} color={c} />
           ),
         }}
       />
       <Tabs.Screen
         name="planets"
         options={{
-          title: 'Planeten',
-          tabBarIcon: ({ color: c }) => (
-            <IconSymbol size={22} name="list.bullet" color={c} />
+          title: 'Lexikon',
+          tabBarIcon: ({ color: c, focused }) => (
+            <IconSymbol size={22} name={focused ? 'book.fill' : 'book'} color={c} />
           ),
         }}
       />

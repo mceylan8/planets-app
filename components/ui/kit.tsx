@@ -2,7 +2,7 @@
  * Bausteine des Design-Systems. Doku mit Varianten und Zuständen: DESIGN.md.
  * Alle Werte kommen aus constants/theme.ts.
  */
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import {
   Platform,
   Pressable,
@@ -14,7 +14,12 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, {
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { color, elevation, hitTarget, motion, radius, space, type } from '@/constants/theme';
 import { Body } from '@/constants/planets';
@@ -150,28 +155,90 @@ export function IconButton({
   label,
   onPress,
   variant = 'floating',
+  active,
 }: {
   icon: IconSymbolName;
   /** Pflicht: wird vorgelesen */
   label: string;
   onPress: () => void;
   variant?: 'floating' | 'plain';
+  /** An/aus-Knopf: aktiv = Akzentfläche (z. B. Licht an, Menü offen) */
+  active?: boolean;
 }) {
   return (
     <PressableScale
       onPress={onPress}
-      accessibilityRole="button"
+      accessibilityRole={active === undefined ? 'button' : 'togglebutton'}
+      accessibilityState={active === undefined ? undefined : { checked: active }}
       accessibilityLabel={label}
       hitSlop={4}
       style={({ hovered, pressed }) => [
         styles.iconButton,
         variant === 'floating' && [styles.floating, elevation.floating],
         (hovered || pressed) && { backgroundColor: variant === 'floating' ? color.surfaceRaised : color.hoverFill },
+        active && { backgroundColor: hovered || pressed ? color.accentPressed : color.accent, borderColor: color.accent },
       ]}>
-      <IconSymbol name={icon} size={22} color={color.text} />
+      <IconSymbol name={icon} size={22} color={active ? color.onAccent : color.text} />
     </PressableScale>
   );
 }
+
+/* ---------- ToggleRow ---------- */
+
+/**
+ * Ganze Zeile schaltet: Icon, Name mit kurzem Hinweis, Schalter rechts.
+ * Schalter an = Akzent. Knopf gleitet 180 ms mit easeOut.
+ */
+export function ToggleRow({
+  icon,
+  label,
+  hint,
+  value,
+  onChange,
+}: {
+  icon: IconSymbolName;
+  label: string;
+  hint?: string;
+  value: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  const t = useSharedValue(value ? 1 : 0);
+  useEffect(() => {
+    t.value = withTiming(value ? 1 : 0, { duration: 180, easing: motion.easeOut });
+  }, [value, t]);
+  const track = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(t.value, [0, 1], [color.surfaceRaised, color.accent]),
+  }));
+  const knob = useAnimatedStyle(() => ({
+    transform: [{ translateX: t.value * (TRACK_W - KNOB - 2 * KNOB_GAP) }],
+    backgroundColor: interpolateColor(t.value, [0, 1], [color.textMuted, color.onAccent]),
+  }));
+  return (
+    <PressableScale
+      static
+      onPress={() => onChange(!value)}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: value }}
+      accessibilityLabel={label}
+      accessibilityHint={hint}
+      style={({ hovered, pressed }) => [styles.toggleRow, (hovered || pressed) && { backgroundColor: color.hoverFill }]}>
+      <View style={styles.toggleIcon}>
+        <IconSymbol name={icon} size={20} color={value ? color.text : color.textSubtle} />
+      </View>
+      <View style={styles.toggleText}>
+        <Text style={[type.label as any, { color: color.text }]}>{label}</Text>
+        {hint ? <Text style={[type.label as any, styles.toggleHint]}>{hint}</Text> : null}
+      </View>
+      <Animated.View style={[styles.track, track]}>
+        <Animated.View style={[styles.knob, knob]} />
+      </Animated.View>
+    </PressableScale>
+  );
+}
+
+const TRACK_W = 44;
+const KNOB = 20;
+const KNOB_GAP = 3;
 
 /* ---------- SegmentedControl ---------- */
 
@@ -339,6 +406,32 @@ const styles = StyleSheet.create({
   },
   buttonLabel: type.button as any,
   disabled: { opacity: 0.4 },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    minHeight: hitTarget + space.xs,
+    paddingHorizontal: space.xs,
+    paddingVertical: space.xxs,
+    borderRadius: radius.control,
+  },
+  toggleIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.control - space.xxs,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: color.surfaceRaised,
+  },
+  toggleText: { flex: 1, minWidth: 0 },
+  toggleHint: { color: color.textMuted, fontFamily: 'Inter_400Regular' },
+  track: {
+    width: TRACK_W,
+    height: KNOB + 2 * KNOB_GAP,
+    borderRadius: radius.pill,
+    padding: KNOB_GAP,
+  },
+  knob: { width: KNOB, height: KNOB, borderRadius: KNOB / 2 },
   iconButton: {
     width: hitTarget,
     height: hitTarget,

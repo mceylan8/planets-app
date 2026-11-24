@@ -11,6 +11,7 @@ import {
   createBoxController,
 } from '@/components/box/Diorama';
 import { useTabBarOffset } from '@/components/ui/AppTabBar';
+import { MenuSection, SceneHeader, SceneMenu } from '@/components/ui/SceneChrome';
 import {
   AppText,
   Button,
@@ -57,6 +58,8 @@ export default function BoxScreen() {
   const [design, setDesign] = useState<BoxDesign>(() => defaultDesign(BOX_IDS));
   const [sharing, setSharing] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [headerH, setHeaderH] = useState(0);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selected = selectedId ? (getBoxBody(selectedId) ?? null) : null;
   const paintBody = paintId ? getBoxBody(paintId) : undefined;
@@ -188,30 +191,20 @@ export default function BoxScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={[styles.header, { paddingTop: insets.top + space.md }]}>
-        <View style={styles.headerRow}>
-          <View style={styles.headerText}>
-            <AppText variant="title" accessibilityRole="header">
-              {editing ? 'Basteln' : 'Schaukasten'}
-            </AppText>
-            <AppText variant="bodySmall" tone="muted">
-              {editing
-                ? 'Planet zur Seite ziehen zum Umhängen, antippen zum Anmalen'
-                : 'Ziehen zum Schwingen, doppelt tippen zum Zoomen'}
-            </AppText>
-          </View>
-          <View style={styles.controls}>
-            {!editing && (
-              <SegmentedControl
-                label="Licht"
-                options={lampModes}
-                value={lampMode}
-                onChange={changeLamp}
-              />
-            )}
+      <SceneHeader
+        title={editing ? 'Basteln' : 'Schaukasten'}
+        hint={
+          editing
+            ? 'Planet zur Seite ziehen zum Umhängen, antippen zum Anmalen'
+            : 'Ziehen zum Schwingen, doppelt tippen zum Zoomen'
+        }
+        onLayout={(e) => setHeaderH(e.nativeEvent.layout.height)}
+        actions={
+          <>
             <IconButton
               icon={editing ? 'checkmark' : 'paintbrush.fill'}
               label={editing ? 'Basteln beenden' : 'Schaukasten basteln'}
+              active={editing}
               onPress={toggleEditing}
             />
             <IconButton
@@ -219,9 +212,17 @@ export default function BoxScreen() {
               label="Schaukasten als Bild teilen"
               onPress={share}
             />
-          </View>
-        </View>
-      </View>
+            {!editing && (
+              <IconButton
+                icon="slider.horizontal.3"
+                label={menuOpen ? 'Menü schließen' : 'Licht einstellen'}
+                active={menuOpen}
+                onPress={() => setMenuOpen((o) => !o)}
+              />
+            )}
+          </>
+        }
+      />
       <View style={styles.stage}>
         <Diorama
           controller={controller}
@@ -319,6 +320,12 @@ export default function BoxScreen() {
         </View>
       )}
 
+      <SceneMenu open={menuOpen && !editing} onClose={() => setMenuOpen(false)} top={headerH + space.xxs}>
+        <MenuSection title="Licht" hint="Wer leuchtet im Kasten: alles, nur die Planeten oder nur die Sonne als Lampe.">
+          <SegmentedControl label="Licht" options={lampModes} value={lampMode} onChange={changeLamp} />
+        </MenuSection>
+      </SceneMenu>
+
       {toast && (
         <View
           pointerEvents="none"
@@ -336,16 +343,6 @@ export default function BoxScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.space },
-  header: { paddingHorizontal: space.md, paddingBottom: space.sm },
-  headerRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: space.sm,
-  },
-  headerText: { flex: 1, minWidth: 160, gap: 2 },
-  controls: { flexDirection: 'row', alignItems: 'center', gap: space.xs },
   stage: { flex: 1 },
   sheetWrap: {
     position: 'absolute',

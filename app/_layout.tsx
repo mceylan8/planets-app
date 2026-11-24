@@ -48,6 +48,9 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.space } }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="planet/[id]" />
+        <Stack.Screen name="constellation/[id]" />
+        <Stack.Screen name="star/[id]" />
+        <Stack.Screen name="phenomenon/[id]" />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="light" />

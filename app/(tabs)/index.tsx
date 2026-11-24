@@ -7,7 +7,6 @@ import React, {
   useState,
 } from 'react';
 import { AccessibilityInfo, ScrollView, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   SolarSystem,
@@ -15,18 +14,13 @@ import {
 } from '@/components/solar/SolarSystem';
 import { BodySheet } from '@/components/BodySheet';
 import { useTabBarOffset } from '@/components/ui/AppTabBar';
-import {
-  AppText,
-  IconButton,
-  PlanetChip,
-  SegmentedControl,
-} from '@/components/ui/kit';
+import { MenuNote, MenuSection, SceneHeader, SceneMenu } from '@/components/ui/SceneChrome';
+import { IconButton, PlanetChip, SegmentedControl } from '@/components/ui/kit';
 import { Body, bodies, getBody } from '@/constants/planets';
 import { color, space } from '@/constants/theme';
 
 const speeds = [
-  { value: 0, label: 'Pause', a11y: 'Bewegung anhalten' },
-  { value: 1, label: '1×', a11y: 'Normale Geschwindigkeit' },
+  { value: 1, label: '1×', a11y: 'Normale Geschwindigkeit, ein Erdjahr in 40 Sekunden' },
   { value: 5, label: '5×', a11y: 'Fünffache Geschwindigkeit' },
 ];
 
@@ -34,7 +28,9 @@ export default function SystemScreen() {
   const controller = useMemo(createCameraController, []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [speed, setSpeed] = useState(1);
-  const insets = useSafeAreaInsets();
+  const [playing, setPlaying] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [headerH, setHeaderH] = useState(0);
   const tabOffset = useTabBarOffset();
   const { focus, t } = useLocalSearchParams<{ focus?: string; t?: string }>();
   const selected = selectedId ? (getBody(selectedId) ?? null) : null;
@@ -81,37 +77,36 @@ export default function SystemScreen() {
       <SolarSystem
         controller={controller}
         selectedId={selectedId}
-        speed={speed}
+        speed={playing ? speed : 0}
         onPick={select}
       />
 
-      <View
-        pointerEvents="box-none"
-        style={[StyleSheet.absoluteFill, { paddingTop: insets.top + space.md }]}
-      >
-        <View
-          pointerEvents="box-none"
-          style={styles.topBar}
+      <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
+        <SceneHeader
+          title="Sonnensystem"
+          hint="Ziehen zum Drehen, Planet antippen"
           onLayout={(e) => {
-            controller.insets.top =
-              e.nativeEvent.layout.y + e.nativeEvent.layout.height;
+            const h = e.nativeEvent.layout.height;
+            setHeaderH(h);
+            controller.insets.top = h;
           }}
-        >
-          <View pointerEvents="none" style={styles.titleBlock}>
-            <AppText variant="title" accessibilityRole="header">
-              Sonnensystem
-            </AppText>
-            <AppText variant="bodySmall" tone="muted">
-              Ziehen zum Drehen, Planet antippen
-            </AppText>
-          </View>
-          <SegmentedControl
-            label="Geschwindigkeit"
-            options={speeds}
-            value={speed}
-            onChange={setSpeed}
-          />
-        </View>
+          actions={
+            <>
+              <IconButton
+                icon={playing ? 'pause.fill' : 'play.fill'}
+                label={playing ? 'Bewegung anhalten' : 'Bewegung fortsetzen'}
+                active={playing}
+                onPress={() => setPlaying((p) => !p)}
+              />
+              <IconButton
+                icon="slider.horizontal.3"
+                label={menuOpen ? 'Menü schließen' : 'Ansicht einstellen'}
+                active={menuOpen}
+                onPress={() => setMenuOpen((o) => !o)}
+              />
+            </>
+          }
+        />
 
         <View pointerEvents="box-none" style={styles.side}>
           <IconButton
@@ -136,10 +131,10 @@ export default function SystemScreen() {
 
         <View
           pointerEvents="box-none"
-          style={[styles.bottom, { bottom: tabOffset + space.xs }]}
+          style={[styles.bottom, { bottom: tabOffset + space.md }]}
           onLayout={(e) => {
             controller.insets.bottom =
-              e.nativeEvent.layout.height + tabOffset + space.xs;
+              e.nativeEvent.layout.height + tabOffset + space.md;
           }}
         >
           {selected && (
@@ -167,21 +162,27 @@ export default function SystemScreen() {
           </ScrollView>
         </View>
       </View>
+
+      <SceneMenu open={menuOpen} onClose={() => setMenuOpen(false)} top={headerH + space.xxs}>
+        <MenuSection title="Geschwindigkeit" hint="Bei 1× dauert ein Erdjahr 40 Sekunden.">
+          <SegmentedControl
+            label="Geschwindigkeit"
+            options={speeds}
+            value={speed}
+            onChange={(v) => {
+              setSpeed(v);
+              setPlaying(true);
+            }}
+          />
+        </MenuSection>
+        <MenuNote>Größen und Abstände sind nicht maßstabsgetreu, sonst wären die Planeten unsichtbar klein.</MenuNote>
+      </SceneMenu>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.space },
-  topBar: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: space.sm,
-    paddingHorizontal: space.md,
-  },
-  titleBlock: { gap: 2, paddingTop: space.xxs },
   side: {
     position: 'absolute',
     right: space.md,

@@ -19,7 +19,8 @@ import { AppText, Button, IconButton } from '@/components/ui/kit';
 import {
   bodies,
   detailFacts,
-  getBody,
+  dwarfPlanets,
+  getBoxBody,
   planetTypeLabel,
 } from '@/constants/planets';
 import { color, space } from '@/constants/theme';
@@ -29,7 +30,7 @@ export default function PlanetScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const planet = getBody(id);
+  const planet = getBoxBody(id);
   const bus = useMemo(createScrollBus, []);
 
   const goBack = () =>
@@ -54,9 +55,12 @@ export default function PlanetScreen() {
     );
   }
 
+  const all = [...bodies, ...dwarfPlanets];
+  const isDwarf = planet.type === 'dwarf';
   const index = bodies.indexOf(planet);
-  const prev = bodies[index - 1];
-  const next = bodies[index + 1];
+  const pos = all.indexOf(planet);
+  const prev = all[pos - 1];
+  const next = all[pos + 1];
   const viewerHeight = Math.max(300, Math.min(width * 0.9, 460));
 
   return (
@@ -80,7 +84,9 @@ export default function PlanetScreen() {
                 <AppText tone="muted">
                   {planet.type === 'star'
                     ? 'Stern im Zentrum des Sonnensystems'
-                    : `${planetTypeLabel[planet.type]}, Nummer ${index} von der Sonne aus`}
+                    : isDwarf
+                      ? `${planetTypeLabel[planet.type]}, zu klein für einen richtigen Planeten`
+                      : `${planetTypeLabel[planet.type]}, Nummer ${index} von der Sonne aus`}
                 </AppText>
               </View>
 
@@ -99,17 +105,27 @@ export default function PlanetScreen() {
 
               <Comparisons body={planet} />
 
-              <Button
-                label="Im Sonnensystem zeigen"
-                icon="sun.max.fill"
-                onPress={() =>
-                  router.navigate({
-                    pathname: '/',
-                    params: { focus: planet.id, t: String(Date.now()) },
-                  })
-                }
-                style={styles.primary}
-              />
+              {/* Zwergplaneten gibt es nur im Schaukasten, nicht im 3D-System */}
+              {isDwarf ? (
+                <Button
+                  label="Im Schaukasten ansehen"
+                  icon="shippingbox.fill"
+                  onPress={() => router.navigate('/box')}
+                  style={styles.primary}
+                />
+              ) : (
+                <Button
+                  label="Im Sonnensystem zeigen"
+                  icon="sun.max.fill"
+                  onPress={() =>
+                    router.navigate({
+                      pathname: '/',
+                      params: { focus: planet.id, t: String(Date.now()) },
+                    })
+                  }
+                  style={styles.primary}
+                />
+              )}
 
               <View style={styles.pager}>
                 {prev ? (
